@@ -135,7 +135,9 @@ This example solution will require the creation of an initial IAM user for Terra
     - Download the provided module source code in a subdirectory of Terraform sources.<br>
       Keep in mind this module is only provided as-is for the demonstration of an idea, not as a full-proof production-ready solution.
     - AWS credentials will be taken by the provider from `~/.aws/credentials` file, so make sure they are set up correctly and profiles names match the ones used in the code.
-    - Okta provider needs to have `OKTA_API_TOKEN` environment variable set with the token you’ve created before.
+    - Okta provider needs to have `OKTA_API_TOKEN` environment variable set with the token you’ve created before. <br> 
+      The same value is also needed to passed as `okta_api_token` variable in Terraform code, to do it safely use `TF_VAR_okta_api_token` environment variable. <br>
+      This variable is used by Terraform `http` provider to download IdP metadata from Okta on the fly, without the need of saving the file locally.
     - Create a new file, e.g. `terraform.tf` and add the following content to define providers:<br>
       ```hcl
       terraform {
@@ -197,6 +199,12 @@ This example solution will require the creation of an initial IAM user for Terra
           }
         })
       }
+      
+      variable "okta_api_token" {
+        description = "The Okta API token for downloading the IdP metadata"
+        type        = string
+        sensitive   = true
+      }
       ```
         Replace the values with your own, e.g. emails and account IDs, and roles' names.<br>
         For every account and role defined, there will be a corresponding group created in Okta, and users assigned to those groups will have access to the roles.<br>
@@ -212,7 +220,8 @@ This example solution will require the creation of an initial IAM user for Terra
           http = http
         }
 
-        assignment = local.assignment
+        assignment     = local.assignment
+        okta_api_token = var.okta_api_token
       }
       ```
       You can further adjust module configuration, e.g. by changing role names, changing session duration, etc. Only the master account is defined here, child accounts can be defined in the next steps.
@@ -242,8 +251,29 @@ This example solution will require the creation of an initial IAM user for Terra
    Okta will now need to have its cross-account IAM role in the child accounts to read the roles and federate the login process.<br>
    Repeat **steps 3-6** for every child account you want to have access to.
     - In the `~/.aws/credentials` enter a new profile for the child account, e.g. `okta-child` with access keys for the user created in the child account.
-    - In the `terraform.tf` file add a new provider for the child account, e.g. `okta_child`.
+    - In the `terraform.tf` file add a new provider for the child account, e.g. `child`.
+      ```hcl
+      provider "aws" {
+        alias   = "child"
+        profile = "okta-child"
+        region  = "eu-west-1"
+      }
+      ```
     - In the `okta.tf` file add a new module copy for the child account, e.g. `module "child_account"`, and set the same provider alias as just created in the `terraform.tf` file.
+      ```hcl
+      module "child_account" {
+        source = "../module-okta-saml-aws"
+
+        providers = {
+          aws  = aws.child
+          okta = okta
+          http = http
+        }
+
+        assignment     = local.assignment
+        okta_api_token = var.okta_api_token
+      }
+      ```
     - Adjust the `local.assignment` variable to include the new account and roles if it's not already there.
     - Run `terraform apply` to create the required IAM resources in AWS for the child account. <br>
       Note that the SAML application in Okta is shared between all accounts, so it will not be created again.
@@ -285,7 +315,7 @@ This example solution will require the creation of an initial IAM user for Terra
 
       provider "aws" {
         alias   = "master"
-        profile = "my-org-baska-AdminAccess"
+        profile = "my-org-child-AdminAccess"
         region  = "eu-west-1"
       }
       ```
