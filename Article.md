@@ -47,7 +47,7 @@ Here's how AWS SSO access improves the security and efficiency of your cloud env
 
 ## How the login process looks like
 
-The login process with AWS SSO using Okta involves the following steps:
+The login process with AWS SSO using SAML involves the following steps:
 1. **User Authentication**: Users log in to the IdP (e.g., Okta) portal with their credentials.
 2. **SSO Authentication**: The IdP authenticates the user and generates a SAML assertion.
 3. **SAML Assertion**: The IdP sends the SAML assertion to AWS SSO, requesting temporary credentials.
