@@ -27,6 +27,8 @@ This method has several drawbacks:
 * **No Role-Based Access Control**: Defining granular permissions based on roles is limited.
 * **No Automated User Provisioning**: Onboarding and off-boarding users is manual and error-prone.
 
+![](./img/image9.png)
+
 
 ## How it's done now
 
@@ -44,6 +46,7 @@ Here's how AWS SSO access improves the security and efficiency of your cloud env
 * **User Self-Service**: Allow users to manage their access, reset passwords, or MFA settings through the IdP portal.
 * **Simplified Access**: Users can access multiple services with a single set of credentials through SSO.
 
+![](./img/image10.png)
 
 ## How the login process looks like
 
