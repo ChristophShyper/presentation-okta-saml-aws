@@ -66,7 +66,7 @@ The login process with AWS SSO using SAML involves the following steps:
 
 - Running a Unix-like operating system (e.g. macOS or Linux).
 - Basic understanding of AWS, especially IAM and [Organizations](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html).
-- Some understanding of Terraform and using modules.
+- Some understanding of [Terraform](https://www.terraform.io/) and using modules.
 - At least one [AWS](https://aws.amazon.com/) account.
 - An [Okta](https://www.okta.com/) account.
 
