@@ -48,6 +48,7 @@ Here's how AWS SSO access improves the security and efficiency of your cloud env
 
 ![](./img/image10.png)
 
+
 ## How the login process looks like
 
 The login process with AWS SSO using SAML involves the following steps:
