@@ -34,15 +34,15 @@ This method has several drawbacks:
 
 To address the limitations of traditional IAM user management, modern cloud environments are adopting SSO solutions with IdPs like Okta. 
 
-Here's how AWS SSO access improves the security and efficiency of your cloud environment:
+Here's how SSO access improves the security and efficiency of your cloud environment:
 * **Centralized User Management**: Manage user access to AWS centrally from the IdP system, eliminating the need for individual IAM users.
 * **Enhanced Security**: Secure access to AWS resources with SAML-based authentication and MFA through IdP reduces the risk of compromised credentials.
 * **Compliance and Auditing**: Easily track user access to AWS resources and their authentication methods through IdP's comprehensive logs.
-* **Role-Based Access Control**: Define granular permissions based on roles in AWS.
+* **Role-Based Access Control (RBAC)**: Define granular permissions based on roles in AWS.
 * **Session Management**: Control session duration so that even leaked credentials are invalidated quickly.
 * **Automated User Provisioning**: Automate user onboarding and off-boarding with IdP's user lifecycle management.
 * **Centralized Audit Trail**: Track user activities and changes across AWS accounts through audit logs.
-* **Cross-Account Access**: Enable access across multiple AWS accounts with federated access. .
+* **Cross-Account Access**: Enable access across multiple AWS accounts with federated access.
 * **User Self-Service**: Allow users to manage their access, reset passwords, or MFA settings through the IdP portal.
 * **Simplified Access**: Users can access multiple services with a single set of credentials through SSO.
 
@@ -178,7 +178,7 @@ This example solution will require the creation of an initial IAM user for Terra
         base_url = "okta.com"
       }
       ```
-      Replace the values with your own, e.g. `dev-123456` with your organization name, define `aws` providers for master and child accounts.
+      Replace the values with your own, e.g. `dev-123456` with your organization name, define `aws` providers for master account.
     - Create a new file, e.g. `okta.tf` and add the following content to define access mapping for your AWS organization:<br>
       ```hcl
       locals {
@@ -242,10 +242,10 @@ This example solution will require the creation of an initial IAM user for Terra
     - To connect Okta with AWS go to **Admin** page in **Okta**. 
     - Open **Applications** and search for **Amazon Web Services**, which was created by Terraform. 
     - When opened go to the **Provisioning** tab and click on **Configure API Integration**.
-    - Mark the checkbox that appeared, and enter access keys created previously for `OktaUserSSO`, and click **Test API Credentials**.<br>
+    - Mark the checkbox that appeared, and enter access keys created previously for `OktaUserSSO`, and click **Test API Credentials**. And **Save** if there were no errors.<br>
       ![](./img/image2.png)
     - Go back to the list of applications expand **More** on the right and click **Refresh Application Data**. This will let Okta access your AWS account(s) and read IAM roles in them.<br>
-     **It needs to be done every time an account(s) or role(s) are added or removed from provisioning.**<br>
+     **It should be done every time an account(s) or role(s) are added or removed from provisioning.**<br>
       ![](./img/image7.png)
     - Now the defined users can access the AWS Console through Okta. They need to log in to Okta and select the **Amazon Web Services** application to be redirected to the AWS Console.<br>
       If user has more than one role assigned they will be asked to choose which one to use.<br>
@@ -289,9 +289,9 @@ This example solution will require the creation of an initial IAM user for Terra
       ![](./img/image4.png)
 
 9. **Set up CLI for AWS** - see a **[video recap](https://www.youtube.com/watch?v=YK1p5GbNtj8)**<br>
-   To fully migrate from IAM users to IAM roles you need to switch IAM credentials for your terminal and CLI tools. It can be done with various tools. For example Okta's [okta-aws-cli](https://github.com/okta/okta-aws-cli), but the author personally suggests Nike's [gimme-aws-creds](https://github.com/Nike-Inc/gimme-aws-creds), as the one being actively updated and improved, and can use MFA in a headless mode. It can, for example, create a separate AWS credentials profile for every account and every IAM role your user has been assigned with. Which will help with running this example Terraform code, by just renaming credentials profiles names in AWS provider configuration.
+   To fully migrate from IAM users to IAM roles you need to switch IAM credentials for your terminal and CLI tools. It can be done with various tools. For example Okta's [okta-aws-cli](https://github.com/okta/okta-aws-cli), but the author personally suggests Nike's [gimme-aws-creds](https://github.com/Nike-Inc/gimme-aws-creds), as the one being actively updated and improved, and can use hardware MFA in a headless mode. It can, for example, create a separate AWS credentials profile for every account and every IAM role your user has been assigned with. Which will help with running this example Terraform code, by just renaming credentials profiles names in AWS provider configuration.
     - Install **gimme-aws-creds**.
-    - From **Amazon Web Services** application configuration in **Okta** open **General** tab and copy the URL under **App Embed Link**. It will be used as **app_url** next.
+    - From **Amazon Web Services** application configuration in **Okta** admin dashboard open **General** tab and copy the URL under **App Embed Link**. It will be used as **app_url** next.
     - Create `~/.okta_aws_login_config` file with the following content, adjusted with your Okta organization details.
       ```
       [DEFAULT]
@@ -309,7 +309,7 @@ This example solution will require the creation of an initial IAM user for Terra
       aws_rolename = all
       ```
     - Run `gimme-aws-creds`, it will update `~/.aws/credentials` creating needed profiles. The output of the command will tell which credentials profiles have been updated.
-    - Use those profile names to configure AWS providers in your Terraform code replacing the previous ones.
+    - Use those profile names to configure AWS providers in your `terraform.tf` code replacing the previous ones.
       ```hcl
       provider "aws" {
         alias   = "master"
@@ -318,12 +318,12 @@ This example solution will require the creation of an initial IAM user for Terra
       }
 
       provider "aws" {
-        alias   = "master"
+        alias   = "child"
         profile = "my-org-child-AdminAccess"
         region  = "eu-west-1"
       }
       ```
-    - Run `terraform plan` to make sure no changes are needed and new credentials work properly.
+    - Run `terraform plan` to make sure no changes are needed and the new credentials work properly.
     - IAM users created for Terraform can now be deleted. Remember to deactivate access keys before deleting the user.
 
 
@@ -350,6 +350,6 @@ This example solution will require the creation of an initial IAM user for Terra
 
 ## More information and meetup presentation
 
-Source code for the module used in this article together with a meetup presentation with a demo run can be found on GitHub: [presentation-okta-saml-aws](https://github.com/ChristophShyper/presentation-okta-saml-aws)
+The source code for the module used in this article together with a meetup presentation with a demo run can be found on GitHub: [presentation-okta-saml-aws](https://github.com/ChristophShyper/presentation-okta-saml-aws)
 
 ![https://github.com/ChristophShyper/presentation-okta-saml-aws](./img/qr-link.png)
