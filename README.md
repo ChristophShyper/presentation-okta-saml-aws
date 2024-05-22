@@ -1,6 +1,8 @@
 # Getting started with AWS - the proper way - no more IAM users
 
-Presentation about getting started with AWS using IAM roles SAML federation instead of IAM users.
+Presentation and article about getting started with AWS using IAM roles SAML federation instead of IAM users.
+
+### Medium article: https://medium.com/brainly/getting-started-with-aws-the-proper-way-no-more-iam-users-32e94f1d52b6?source=collection_home---------0----------------------------
 
 
 ## AWS User Group KRK meetup #69 with Grand Parade
